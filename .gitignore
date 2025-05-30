@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+ .Python/
+build/
+develop-eggs/
+dist/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Env
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django stuff:
+*.log
+*.pot
+*.mo
+*.htmlc
+*.sqlite3 #
+*.media/ # Si luego configurar carpeta para subir archivos media
+local_settings.py # Archivo de configuración local
+
+# IDEs and other tools
+.vscode/        # Carpetas de configuración de VS Code (opcional, pero buena práctica)
+.idea/          # Para PyCharm
+.DS_Store       # macOS
+Thumbs.db       # Windows
