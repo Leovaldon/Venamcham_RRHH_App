@@ -121,3 +121,10 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+import os
+
+# Ruta donde se guardarán los archivos subidos (ej. PDF de evaluaciones)
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# URL pública para acceder a estos archivos
+MEDIA_URL = '/media/'
