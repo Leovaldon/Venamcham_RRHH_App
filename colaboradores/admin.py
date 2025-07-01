@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from django.contrib import admin
-from .models import Colaborador, Departamento, Cargo, EvaluacionDesempeno, EvaluacionClima, ResultadoOperativo, TipoEvaluacion, Evaluacion360, EvaluacionObjetivos # Importa el modelo Colaborador
+from .models import Colaborador, Departamento, Cargo, EvaluacionDesempeno, EvaluacionClima, ResultadoOperativo, TipoEvaluacion, Evaluacion360, EvaluacionObjetivos, EvaluacionClimaOrganizacional
 
 # Registra el modelo para que sea visible y gestionable en el panel de administración
 admin.site.register(Colaborador)
@@ -13,10 +13,12 @@ admin.site.register(Cargo)
 admin.site.register(TipoEvaluacion)
 admin.site.register(Evaluacion360)
 admin.site.register(EvaluacionObjetivos)
+admin.site.register(EvaluacionClimaOrganizacional)
 
 from django import forms
 from django.contrib import messages
 from django.db import models
+from django.urls import reverse
 from django.utils.html import format_html
 
 #-----------------EVALUACION 360º-----------------
@@ -64,6 +66,7 @@ class Evaluacion360Admin(admin.ModelAdmin):
         'evaluador',
         'puntaje_total',
         'link_documento_adjunto',
+        'generar_reporte_pdf_link',
     )
     list_filter = ('fecha_evaluacion', 'evaluador', 'tipo_evaluacion', 'colaborador')
     search_fields = ('colaborador__primer_nombre', 'colaborador__primer_apellido', 'evaluador')
@@ -101,11 +104,23 @@ class Evaluacion360Admin(admin.ModelAdmin):
     def link_documento_adjunto(self, obj):
         if obj.documento_adjunto: # Verifica si hay un archivo adjunto
             # Retorna un enlace HTML que abre el archivo en una nueva pestaña
-            return format_html('<a href="{}" target="_blank">Ver/Descargar</a>', obj.documento_adjunto.url)
+            return format_html('<a class="button" href="{}" target="_blank">Ver/Descargar</a>', obj.documento_adjunto.url)
         return "N/A" # Si no hay archivo, muestra "N/A"
 
     link_documento_adjunto.short_description = "Documento Adjunto" # Nombre de la columna en el listado
 # --------------------------------------------------------
+
+# --- NUEVO MÉTODO PARA EL ENLACE DE GENERAR REPORTE PDF DE SISTEMA ---
+    def generar_reporte_pdf_link(self, obj):
+        # Crea un enlace a la URL que definimos en colaboradores/urls.py
+        # 'colaboradores:reporte_evaluacion360_pdf' hace referencia a 'app_name:name_de_la_url'
+        if obj.pk: # Asegura que el objeto ya esté guardado y tenga un ID
+            url = reverse('colaboradores:reporte_evaluacion360_pdf', args=[obj.pk])
+            return format_html(
+                '<a class="button" href="{}" target="_blank" style="background-color: #4CAF50; color: white; padding: 5px 10px; text-align: center; text-decoration: none; display: inline-block; border-radius: 4px;">Generar PDF</a>',
+                url
+            )
+            return "Guardar para generar"
 
 # Ahora registraremos Evaluacion360 con nuestra clase de personalización
 admin.site.unregister(Evaluacion360)
@@ -155,6 +170,7 @@ class EvaluacionObjetivosAdmin(admin.ModelAdmin):
         'puntuacion_final',
         'evaluador',
         'link_documento_adjunto',
+        'generar_reporte_pdf_link_objetivos',
     )
     list_filter = ('fecha_evaluacion', 'evaluador', 'tipo_medicion', 'colaborador')
     search_fields = ('colaborador__primer_nombre', 'colaborador__primer_apellido', 'objetivo_general', 'evaluador')
@@ -174,11 +190,24 @@ class EvaluacionObjetivosAdmin(admin.ModelAdmin):
         })
     )
 
+# --- NUEVO MÉTODO PARA EL ENLACE DE GENERAR REPORTE PDF DE OBJETIVOS ---
+    def generar_reporte_pdf_link_objetivos(self, obj):
+        if obj.pk:
+            # Asegúrate de que el nombre de la URL coincida con el de colaboradores/urls.py
+            url = reverse('colaboradores:reporte_evaluacion_objetivos_pdf', args=[obj.pk])
+            return format_html(
+                '<a class="button" href="{}" target="_blank" style="background-color: #4CAF50; color: white; padding: 5px 10px; text-align: center; text-decoration: none; display: inline-block; border-radius: 4px;">Generar PDF</a>',
+                url
+            )
+        return "Guardar para generar"
+
+    generar_reporte_pdf_link_objetivos.short_description = "Reporte Sistema"
+
 # --- MÉTODO PERSONALIZADO PARA EL ENLACE DEL DOCUMENTO ---
     def link_documento_adjunto(self, obj):
         if obj.documento_adjunto: # Verifica si hay un archivo adjunto
             # Retorna un enlace HTML que abre el archivo en una nueva pestaña
-            return format_html('<a href="{}" target="_blank">Ver/Descargar</a>', obj.documento_adjunto.url)
+            return format_html('<a class="button" href="{}" target="_blank">Ver/Descargar</a>', obj.documento_adjunto.url)
         return "N/A" # Si no hay archivo, muestra "N/A"
 
     link_documento_adjunto.short_description = "Documento Adjunto" # Nombre de la columna en el listado
@@ -187,3 +216,114 @@ class EvaluacionObjetivosAdmin(admin.ModelAdmin):
 # Ahora registraremos EvaluacionObjetivos con nuestra clase de personalización
 admin.site.unregister(EvaluacionObjetivos)
 admin.site.register(EvaluacionObjetivos, EvaluacionObjetivosAdmin)
+
+#-----------------EVALUACION CLIMA ORGANIZACIONAL-----------------
+
+class EvaluacionClimaOrganizacionalAdminForm(forms.ModelForm):
+    descripcion_clima = forms.CharField(
+        label="",
+        widget=forms.Textarea(attrs={'readonly': 'readonly', 'rows': 4, 'cols': 80, 'style': 'border: none; background-color: transparent; resize: none; font-style: italic;'}),
+        initial="Esta encuesta de clima organizacional busca recopilar feedback anónimo sobre diferentes aspectos del ambiente laboral, las relaciones y la percepción de la empresa. Su objetivo es identificar fortalezas y áreas de mejora para el bienestar y desarrollo de todos los colaboradores.",
+        required=False
+    )
+
+    class Meta:
+        model = EvaluacionClimaOrganizacional
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Validar que las puntuaciones de las preguntas cerradas estén entre 1 y 5
+        # Filtramos campos que son IntegerField y no son ForeignKeys (para evitar el id del departamento o tipo_evaluacion)
+        puntuaciones_fields = [
+            f.name for f in self.Meta.model._meta.get_fields()
+            if isinstance(f, models.IntegerField) and f.name not in ['id', 'departamento_id', 'tipo_evaluacion_id']
+        ]
+
+        for field_name in puntuaciones_fields:
+            valor = cleaned_data.get(field_name)
+            if valor is not None:
+                if not (1 <= valor <= 5):
+                    self.add_error(field_name, "La puntuación debe ser entre 1 y 5.")
+
+        return cleaned_data
+
+class EvaluacionClimaOrganizacionalAdmin(admin.ModelAdmin):
+    form = EvaluacionClimaOrganizacionalAdminForm
+
+    list_display = (
+        'departamento',
+        'fecha_evaluacion',
+        'puntaje_total_cerradas', # Mostramos el puntaje total
+        'link_documento_adjunto_clima', # Para futuros documentos adjuntos
+    )
+    list_filter = ('fecha_evaluacion', 'departamento')
+    search_fields = ('departamento__nombre',)
+
+    fieldsets = (
+        (None, {
+            'fields': ('descripcion_clima',)
+        }),
+        ('Información Básica', {
+            'fields': ('departamento', 'fecha_evaluacion', 'tipo_evaluacion'),
+            'description': 'Seleccione el departamento y la fecha de esta evaluación de clima. (Esta encuesta es anónima).'
+        }),
+        ('Relación con La Compañía (Puntúe del 1 al 5)', {
+            'fields': (
+                'rc1_directiva_coherente', 'rc2_conoce_plan_estrategico',
+                'rc3_comparte_objetivos', 'rc4_identifica_valores',
+                'rc5_comprometido_empresa', 'rc6_desarrollar_carrera',
+                'rc7_mejorar_empresa_abierta', # Pregunta abierta aquí
+            ),
+        }),
+        ('Relación con Los Líderes (Puntúe del 1 al 5)', {
+            'fields': (
+                'rl1_genera_ilusion', 'rl2_mantiene_ambiente', 'rl3_dedica_tiempo',
+                'rl4_lider_coherente', 'rl5_comunica_prioridades', 'rl6_efectividad_feedback',
+                'rl7_opinion_liderazgo_abierta', # Pregunta abierta
+            ),
+        }),
+        ('Relación con El Puesto de Trabajo (Puntúe del 1 al 5)', {
+            'fields': (
+                'rpt1_recibio_herramientas', 'rpt2_impacto_objetivos_global',
+                'rpt3_autonomia_trabajo', 'rpt4_feedback_ayuda_mejorar',
+                'rpt5_conoce_crecimiento_profesional', 'rpt6_formacion_ayuda',
+                'rpt7_siente_valorado', 'rpt8_concluye_trabajo_jornada',
+                'rpt9_mejorar_puesto_abierta', # Pregunta abierta
+            ),
+        }),
+        ('Relación con Los Compañeros (Puntúe del 1 al 5)', {
+            'fields': (
+                'rco1_ambiente_positivo', 'rco2_trabajo_equipo',
+                'rco3_conoce_otros_departamentos', 'rco4_fomenta_agilidad',
+                'rco5_comunicaciones_claras', 'rco6_comentarios_companeros_abierta', # Pregunta abierta
+            ),
+        }),
+        ('Relación con Los Clientes (Puntúe del 1 al 5)', {
+            'fields': (
+                'rcl1_conoce_necesidades', 'rcl2_clientes_satisfechos',
+                'rcl3_recomendaciones_tenidas_cuenta', 'rcl4_compagina_objetivos_calidad',
+            ),
+        }),
+        ('Puntaje Total (Oculto)', { # Campo oculto, solo para referencia interna
+            'fields': ('puntaje_total_cerradas',),
+            'description': 'Este campo se calcula automáticamente y no se muestra en el formulario de la encuesta.',
+            'classes': ('collapse',), # Oculta esta sección por defecto
+        })
+    )
+    readonly_fields = ('puntaje_total_cerradas',) # No permitimos editar el total
+
+    # --- MÉTODO PERSONALIZADO PARA EL ENLACE DEL DOCUMENTO ---
+    def link_documento_adjunto_clima(self, obj):
+        # Asumiendo que el modelo EvaluacionClimaOrganizacional tiene un campo 'documento_adjunto'
+        if hasattr(obj, 'documento_adjunto') and obj.documento_adjunto:
+            return format_html('<a href="{}" target="_blank">Ver/Descargar</a>', obj.documento_adjunto.url)
+        return "N/A"
+    link_documento_adjunto_clima.short_description = "Informe Adjunto"
+
+    # --------------------------------------------------------
+
+# Ahora registraremos EvaluacionClimaOrganizacional con nuestra clase de personalización
+admin.site.unregister(EvaluacionClimaOrganizacional)
+admin.site.register(EvaluacionClimaOrganizacional, EvaluacionClimaOrganizacionalAdmin)

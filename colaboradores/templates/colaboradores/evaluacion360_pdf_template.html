@@ -1,0 +1,201 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reporte de Evaluación 360º</title>
+    <style>
+        /* Colores Corporativos Directos (sin variables CSS para compatibilidad con xhtml2pdf) */
+        /* Azul Venamcham: #283479 */
+        /* Rojo Venamcham: #AC182D */
+        /* Borde/Fondo claro: #ddd / #f9f9f9 */
+
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 1.5cm; 
+            font-size: 9.5pt; 
+            color: #444; 
+        }
+
+        /* Encabezados */
+        h1 { 
+            color: #283479; /* Azul Venamcham */
+            border-bottom: 2px solid #283479; 
+            padding-bottom: 8px; 
+            margin-top: 25px;
+            font-size: 18pt;
+        }
+        h2 { 
+            color: #AC182D; /* Rojo Venamcham */
+            border-bottom: 1px solid #000000; 
+            padding-bottom: 5px; 
+            margin-top: 20px;
+            font-size: 14pt;
+        }
+
+        /* Contenedores con encuadres (bordes y fondo claro) */
+        .info-block {
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        /* Logo */
+        .logo-header {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .logo-header img {
+            max-width: 150px; 
+            height: auto;
+        }
+
+        /* Tabla de Preguntas */
+        .question-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 7px; 
+            table-layout: fixed;
+        }
+        .question-table th, .question-table td { 
+            border: 1px solid #000000; /* Líneas de la tabla en negro */
+            padding: 2px;
+            text-align: center; 
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+        .question-table th { 
+            background-color: #283479; /* Fondo del encabezado de tabla en azul */
+            color: white; 
+            font-weight: bold;
+            font-size: 12pt;
+        }
+        .question-table td:last-child {
+            width: 100px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Puntaje Total */
+        .total-score { 
+            font-weight: bold; 
+            text-align: right; 
+            margin-top: 15px; 
+            font-size: 11pt;
+            padding-right: 8px;
+        }
+
+        /* Comentarios */
+        .comments { 
+            margin-top: 25px;
+            border: 1px #000000
+        }
+        .comments p {
+            background-color: #f9f9f9;
+            border: 1px dashed #ddd; /* Borde punteado para comentarios */
+            padding: 5px;
+            border-radius: 5px;
+            white-space: pre-wrap; 
+        }
+
+        /* Bloques de Firma */
+        .signature-container {
+            margin-top: 50px;
+            display: flex; 
+            justify-content: space-around; 
+        }
+        .signature-block {
+            width: 45%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .signature-line { 
+            border-bottom: 1px solid #000; 
+            width: 80%; 
+            margin: 50px auto 5px auto; 
+            padding-top: 5px; 
+        }
+        .page-break { 
+            page-break-before: always; 
+        } 
+    </style>
+</head>
+<body>
+    <div class="logo-header">
+        <img src="{% static 'img/logo_venamcham.png' %}" alt="Logo Venamcham">
+    </div>
+
+    <div class="header-info info-block">
+        <p><strong>Cámara Venezolano-Americana de Comercio e Industria (Venamcham)</strong></p>
+        <p>Reporte Oficial de Evaluación 360º</p>
+        <p>Fecha de Generación del Reporte: {{ now|date:"d/m/Y H:i" }}</p>
+    </div>
+
+    <h1>Detalles de la Evaluación</h1>
+
+    <div class="colaborador-info info-block">
+        <h2>Información del Colaborador y Evaluación</h2>
+        <p><strong>Nombre del Colaborador:</strong> {{ evaluacion.colaborador.primer_nombre }} {{ evaluacion.colaborador.primer_apellido }}</p>
+        <p><strong>Cédula:</strong> {{ evaluacion.colaborador.cedula }}</p>
+        <p><strong>Cargo:</strong> {{ evaluacion.colaborador.cargo.nombre }}</p>
+        <p><strong>Departamento:</strong> {{ evaluacion.colaborador.departamento.nombre }}</p>
+        <p><strong>Fecha de la Evaluación:</strong> {{ evaluacion.fecha_evaluacion|date:"d/m/Y" }}</p>
+        <p><strong>Evaluador:</strong> {{ evaluacion.evaluador }}</p>
+    </div>
+
+    <div class="evaluation-summary">
+        <h2>Puntuaciones de Comportamiento y Habilidades</h2>
+        <p style="font-size: 0.9em; font-style: italic;">Escala de Puntuación: 1 = Necesita Mejorar, 2 = Regular, 3 = Aceptable, 4 = Bueno, 5 = Excelente.</p>
+        <table class="question-table">
+            <thead>
+                <tr>
+                    <th style="width: 80%;">Pregunta Evaluada</th>
+                    <th style="width: 20%;">Puntuación</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>El colaborador resuelve problemas de forma efectiva.</td><td>{{ evaluacion.p1_resuelve_problemas }}</td></tr>
+                <tr><td>El colaborador sabe resolver conflictos adecuadamente.</td><td>{{ evaluacion.p2_resuelve_conflictos }}</td></tr>
+                <tr><td>El colaborador es respetuoso con el resto de los empleados.</td><td>{{ evaluacion.p3_respetuoso }}</td></tr>
+                <tr><td>El colaborador muestra empatía.</td><td>{{ evaluacion.p4_empatia }}</td></tr>
+                <tr><td>El colaborador es sociable y se comunica de forma abierta y cercana con sus colegas.</td><td>{{ evaluacion.p5_sociable_comunicativo }}</td></tr>
+                <tr><td>El colaborador es un compañero en quien se puede confiar.</td><td>{{ evaluacion.p6_confiable }}</td></tr>
+                <tr><td>El colaborador aporta valor y conocimiento al resto.</td><td>{{ evaluacion.p7_aporta_valor }}</td></tr>
+                <tr><td>El colaborador tiene una actitud proactiva a la hora de ayudar en el equipo.</td><td>{{ evaluacion.p8_actitud_proactiva_ayudar }}</td></tr>
+                <tr><td>El colaborador es proactivo para aportar ideas.</td><td>{{ evaluacion.p9_proactivo_ideas }}</td></tr>
+                <tr><td>El colaborador toma la iniciativa en los proyectos.</td><td>{{ evaluacion.p10_iniciativa_proyectos }}</td></tr>
+                <tr><td>El colaborador conoce y pone en práctica la misión y los valores de la empresa.</td><td>{{ evaluacion.p11_conoce_valores }}</td></tr>
+                <tr><td>El colaborador demuestra un comportamiento ético y profesional.</td><td>{{ evaluacion.p12_comportamiento_etico }}</td></tr>
+                <tr><td>El colaborador se implica en su trabajo y cumple los plazos.</td><td>{{ evaluacion.p13_implica_cumple_plazos }}</td></tr>
+                <tr><td>El colaborador sabe manejarse en situaciones de estrés y de sobrecarga de trabajo.</td><td>{{ evaluacion.p14_manejo_estres }}</td></tr>
+                <tr><td>El colaborador recibe de forma positiva las críticas y los comentarios constructivos, ya sean positivos o negativos; aprende de sus errores.</td><td>{{ evaluacion.p15_recibe_criticas_aprende }}</td></tr>
+                <tr><td>El colaborador toma en cuenta y valora otras opiniones incluso si son distintas a las suyas.</td><td>{{ evaluacion.p16_valora_otras_opiniones }}</td></tr>
+                <tr><td>El colaborador aporta ideas innovadoras para alcanzar objetivos.</td><td>{{ evaluacion.p17_ideas_innovadoras }}</td></tr>
+                <tr><td>El colaborador se muestra a favor y practica la formación continua como método de ayuda al crecimiento de la empresa.</td><td>{{ evaluacion.p18_practica_formacion_continua }}</td></tr>
+            </tbody>
+        </table>
+        <p class="total-score"><strong>Puntaje Total Obtenido: {{ evaluacion.puntaje_total }}</strong></p>
+        <p class="total-score"><strong>Puntaje Máximo Posible: 90</strong></p> 
+    </div>
+
+    <div class="comments info-block">
+        <h2>Comentarios Adicionales del Evaluador</h2>
+        <p>{{ evaluacion.comentarios|default:"Sin comentarios adicionales registrados." }}</p>
+    </div>
+
+    <div class="signature-container">
+        <div class="signature-block">
+            <p class="signature-line"></p>
+            <br>
+            <p>Firma del Colaborador Evaluado</p>
+            <br>
+        </div>
+        <div class="signature-block">
+            <p class="signature-line"></p>
+            <p>Firma del Evaluador</p>
+        </div>
+    </div>
+
+</body>
+</html>

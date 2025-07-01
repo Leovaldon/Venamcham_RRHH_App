@@ -1,0 +1,66 @@
+# Aplicación para la Evaluación y Gestión Integral de Recursos Humanos (Venamcham)
+
+Este repositorio contiene el código fuente de una aplicación web desarrollada con Django para la gestión integral de Recursos Humanos en la Cámara Venezolano-Americana de Comercio e Industria (Venamcham).
+
+## 🚀 Funcionalidades Implementadas
+
+La aplicación cubre las siguientes áreas clave de la gestión de talento humano:
+
+* **Centralización de la Información de Colaboradores:**
+    * Registro y gestión de datos personales y laborales de los colaboradores.
+    * Asociación de colaboradores a Departamentos y Cargos predefinidos.
+* **Gestión de Evaluaciones de Desempeño:**
+    * **Evaluación 360º:** Registro detallado de puntuaciones en diversas competencias y habilidades, con cálculo automático del puntaje total. Generación de reportes PDF descargables con formato corporativo.
+    * **Evaluación por Objetivos (OKR):** Registro de objetivos, tipo de medición (%, cantidad), meta, resultado obtenido y puntuación final. Generación de reportes PDF descargables.
+* **Gestión de Evaluaciones de Clima Organizacional:**
+    * Registro de respuestas a encuestas de clima, organizadas por secciones y con preguntas cerradas (ponderadas 1-5) y abiertas. Se maneja de forma anónima a nivel de departamento.
+
+## ✨ Tecnologías Utilizadas
+
+* **Backend:** Python 3.x, Django 5.x
+* **Base de Datos:** SQLite3 (para desarrollo y entorno de baja escala)
+* **Control de Versiones:** Git / GitHub
+* **Generación de PDF:** `xhtml2pdf`
+
+## ⚙️ Configuración y Ejecución del Proyecto
+
+Sigue estos pasos para poner en marcha el proyecto en tu entorno local:
+
+### 1. Clona el Repositorio
+
+```bash
+git clone [https://github.com/Leovaldon/Venamcham_RRHH_App.git](https://github.com/Leovaldon/Venamcham_RRHH_App.git)
+cd Venamcham_RRHH_App
+
+### 2. Configura tu Entorno Virtual
+
+python -m venv venv
+
+En Windows Power Shell: .\venv\Scripts\Activate
+En Windows CMD: venv\Scripts\activate
+En macOS / Linux: source venv/bin/activate
+
+### 3. Instalar las Dependencias
+
+pip install django xhtml2pdf psycopg2-binary # Aunque se usa SQLite, psycopg2-binary es útil si cambias a PostgreSQL.
+
+#### 4. Aplica las Migraciones en la Base de Datos
+
+python manage.py migrate
+
+#### 5. Crea un Superusuario (Administrador)
+
+python manage.py createsuperuser
+
+### 6. Inicia el Servidor de desarrollo
+
+python manage.py runserver
+
+#### 7. Accede al Panel de Administracion
+
+Navega a http://127.0.0.1:8000/admin/ e inicia sesión con el superusuario que creaste. 
+Desde aquí podrás gestionar todos los datos de la aplicación.
+
+📄 Generación de Reportes PDF
+Para generar los reportes PDF de las evaluaciones (360º y por Objetivos), accede al panel de administración, 
+selecciona la evaluación deseada y haz clic en el botón "Generar PDF" en la lista de evaluaciones.

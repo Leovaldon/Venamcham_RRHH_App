@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reporte de Evaluación por Objetivos</title>
+    <style>
+        /* Colores Corporativos Directos (sin variables CSS) */
+        /* Azul Venamcham: #283479 */
+        /* Rojo Venamcham: #AC182D */
+        /* Borde/Fondo claro: #ddd / #f9f9f9 */
+
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 1.5cm; 
+            font-size: 9.5pt; 
+            color: #444; 
+        }
+
+        h1 { 
+            color: #283479; 
+            border-bottom: 2px solid #283479; 
+            padding-bottom: 8px; 
+            margin-top: 25px;
+            font-size: 18pt;
+        }
+        h2 { 
+            color: #AC182D; 
+            border-bottom: 1px solid #ddd; 
+            padding-bottom: 5px; 
+            margin-top: 20px;
+            font-size: 14pt;
+        }
+
+        .info-block {
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px; 
+        }
+
+        .logo-header {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .logo-header img {
+            max-width: 150px; 
+            height: auto;
+        }
+
+        .objective-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 15px; 
+        }
+        .objective-table th, .objective-table td { 
+            border: 1px solid #AC182D; 
+            padding: 8px; 
+            text-align: left; 
+            vertical-align: top;
+        }
+        .objective-table th { 
+            background-color: #283479; 
+            color: white; 
+            font-weight: bold;
+            font-size: 10pt;
+        }
+        .comments p {
+            background-color: #f9f9f9;
+            border: 1px dashed #ddd;
+            padding: 5px;
+            border-radius: 5px;
+            white-space: pre-wrap; 
+        }
+        .signature-container {
+            margin-top: 50px;
+            display: flex; 
+            justify-content: space-around; 
+        }
+        .signature-block {
+            width: 45%; 
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .signature-line { 
+            border-bottom: 1px solid #000; 
+            width: 80%; 
+            margin: 50px auto 5px auto; 
+            padding-top: 5px; 
+        }
+        .page-break { 
+            page-break-before: always; 
+        } 
+    </style>
+</head>
+<body>
+    <div class="logo-header">
+        <p><strong>Cámara Venezolano-Americana de Comercio e Industria (Venamcham)</strong></p>
+    </div>
+
+    <div class="header-info info-block">
+        <p>Reporte Oficial de Evaluación por Objetivos</p>
+        <p>Fecha de Generación del Reporte: {{ now|date:"d/m/Y H:i" }}</p>
+    </div>
+
+    <h1>Detalles de la Evaluación por Objetivos</h1>
+
+    <div class="colaborador-info info-block">
+        <h2>Información General de la Evaluación</h2>
+        <p><strong>Colaborador Evaluado:</strong> {{ evaluacion.colaborador.primer_nombre }} {{ evaluacion.colaborador.primer_apellido }} ({{ evaluacion.colaborador.cedula }})</p>
+        <p><strong>Cargo:</strong> {{ evaluacion.colaborador.cargo.nombre }}</p>
+        <p><strong>Departamento:</strong> {{ evaluacion.colaborador.departamento.nombre }}</p>
+        <p><strong>Fecha de Evaluación:</strong> {{ evaluacion.fecha_evaluacion|date:"d/m/Y" }}</p>
+        <p><strong>Período Evaluado:</strong> {{ evaluacion.periodo_evaluado|default:"N/A" }}</p>
+        <p><strong>Evaluador del Objetivo:</strong> {{ evaluacion.evaluador }}</p>
+    </div>
+
+    <div class="objective-details info-block">
+        <h2>Detalle del Objetivo</h2>
+        <p><strong>Objetivo:</strong> {{ evaluacion.objetivo_general }}</p>
+        <table class="objective-table">
+            <thead>
+                <tr>
+                    <th>Tipo de Medición</th>
+                    <th>Meta (Valor Esperado)</th>
+                    <th>Resultado Obtenido</th>
+                    <th>Puntuación Final (1-5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ evaluacion.tipo_medicion }}</td>
+                    <td>{{ evaluacion.meta }}</td>
+                    <td>{{ evaluacion.resultado_obtenido|default:"No registrado" }}</td>
+                    <td>{{ evaluacion.puntuacion_final|default:"N/A" }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="comments info-block">
+        <h2>Observaciones y Feedback</h2>
+        <p>{{ evaluacion.observaciones|default:"Sin observaciones ni feedback registrados." }}</p>
+    </div>
+
+    <div class="signature-container">
+        <div class="signature-block">
+            <p class="signature-line"></p>
+            <p>Firma del Colaborador Evaluado</p>
+        </div>
+        <div class="signature-block">
+            <p class="signature-line"></p>
+            <p>Firma del Evaluador</p>
+        </div>
+    </div>
+
+</body>
+</html>
