@@ -231,7 +231,7 @@ class Evaluacion360(models.Model):
     def __str__(self):
         return f"Eval. 360º de {self.colaborador.primer_nombre} {self.colaborador.primer_apellido} ({self.fecha_evaluacion} por {self.evaluador})"
 
-#-----------------EVALUACION POR OBJETIVOS OKR-----------------
+#-----------------EVALUACION POR OBJETIVOS-----------------
 class EvaluacionObjetivos(models.Model):
 
     # Modelo que representa la Evaluacion por Objetivos aplicados a los Colaboradores en Venamcham
